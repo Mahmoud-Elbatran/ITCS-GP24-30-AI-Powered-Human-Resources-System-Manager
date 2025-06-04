@@ -4,7 +4,7 @@ class HRRecordsPage extends StatelessWidget {
   HRRecordsPage({super.key});
 
   final Map<String, dynamic> user = {
-    'name': 'Ali Mohamed',
+    'name': 'zeina zidan w as7bha',
     'position': 'Software Engineer',
     'employeeId': 'EMP2025-0456',
     'department': 'Engineering',
@@ -15,6 +15,7 @@ class HRRecordsPage extends StatelessWidget {
     'bonus': 4000,
     'performanceReviews': [
       {
+
         'title': 'Q1 2025 Review',
         'rating': 4.7,
         'comment': 'Exceeds Expectations'

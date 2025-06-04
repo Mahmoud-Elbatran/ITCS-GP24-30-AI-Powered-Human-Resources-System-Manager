@@ -1,40 +1,72 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({Key? key}) : super(key: key);
 
   @override
-  State<CalendarPage> createState() => _CalendarPageState();
+  _CalendarPageState createState() => _CalendarPageState();
 }
 
 class _CalendarPageState extends State<CalendarPage> {
   DateTime selectedDate = DateTime.now();
+  TimeOfDay? selectedTime;
   final TextEditingController titleController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
-  String? notificationTime;
+  String? selectedNotification;
 
-  @override
-  void initState() {
-    super.initState();
-    dateController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
+  Future<void> pickTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime ?? TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        selectedTime = picked;
+      });
+    }
+  }
+
+  Future<void> saveEvent() async {
+    if (titleController.text.isEmpty || selectedNotification == null || selectedTime == null) return;
+
+    final DateTime fullDateTime = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedTime!.hour,
+      selectedTime!.minute,
+    );
+
+    await FirebaseFirestore.instance.collection('calendarEvents').add({
+      'title': titleController.text,
+      'date': Timestamp.fromDate(fullDateTime),
+      'notification': selectedNotification,
+    });
+
+    titleController.clear();
+    setState(() {
+      selectedNotification = null;
+      selectedTime = null;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Event saved successfully")),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final String formattedTime = selectedTime != null
+        ? selectedTime!.format(context)
+        : "No time selected";
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calendar'),
-      ),
+      appBar: AppBar(title: const Text("Calendar")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+        padding: const EdgeInsets.all(20.0),
+        child: Row(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(16),
-              ),
+            Expanded(
               child: CalendarDatePicker(
                 initialDate: selectedDate,
                 firstDate: DateTime(2020),
@@ -42,69 +74,58 @@ class _CalendarPageState extends State<CalendarPage> {
                 onDateChanged: (date) {
                   setState(() {
                     selectedDate = date;
-                    dateController.text = DateFormat('yyyy-MM-dd').format(date);
                   });
                 },
               ),
             ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: titleController,
-              decoration: InputDecoration(
-                hintText: 'Event Title',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+            const SizedBox(width: 30),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Add New Event", style: TextStyle(fontSize: 20)),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: titleController,
+                    decoration: const InputDecoration(labelText: "Event Title"),
+                  ),
+                  const SizedBox(height: 20),
+                  Text("Event Date: ${selectedDate.toIso8601String().substring(0, 10)}"),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Text("Event Time: "),
+                      Text(formattedTime),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: pickTime,
+                        child: const Text("Pick Time"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  DropdownButtonFormField<String>(
+                    value: selectedNotification,
+                    hint: const Text("Select notification time"),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedNotification = value;
+                      });
+                    },
+                    items: [
+                      '5 minutes before',
+                      '10 minutes before',
+                      '1 hour before',
+                      '1 day before',
+                    ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: saveEvent,
+                    child: const Text("Save Event"),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: dateController,
-              readOnly: true,
-              decoration: InputDecoration(
-                hintText: 'Select Date',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: notificationTime,
-              items: const [
-                DropdownMenuItem(child: Text('1 hour before'), value: '1 hour before'),
-                DropdownMenuItem(child: Text('30 minutes before'), value: '30 minutes before'),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  notificationTime = value;
-                });
-              },
-              decoration: InputDecoration(
-                hintText: 'Notification Time',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                if (titleController.text.isNotEmpty && notificationTime != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Event saved successfully!')),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please complete all fields!')),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              child: const Text('Save Event'),
             ),
           ],
         ),

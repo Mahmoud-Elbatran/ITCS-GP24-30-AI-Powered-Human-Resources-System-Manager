@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 
 import 'EmployeePage.dart';
 import 'onboarding.dart';
@@ -94,16 +96,16 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final darkBlue = const Color(0xFF0A2540);
-    final lightBlue = const Color(0xFF5A8BD6);
+    final navyBlue = Color(0xFF0A2540); // Navy Blue background color
+    final lightBlue = Color(0xFF5A8BD6);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: navyBlue, // Navy blue background color
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 400),
           child: Card(
-            color: darkBlue,
+            color: Colors.white, // White color for the card
             margin: const EdgeInsets.all(16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             elevation: 12,
@@ -133,22 +135,26 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  // REBOTA Text - Modern font applied (Poppins)
                   Text(
                     "REBOTA",
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 4,
-                      color: lightBlue,
+                      color: Color(0xFF0A2540), // Direct color usage
+                      fontFamily: 'Poppins', // Modern font family
                     ),
                   ),
                   const SizedBox(height: 8),
+                  // HR Assistant Text - Color updated to match background
                   Text(
                     "Your HR Assistant",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
-                      color: lightBlue.withOpacity(0.7),
+                      color: Color(0xFF0A2540), // Direct color usage
+                      fontFamily: 'Poppins', // Modern font family
                     ),
                   ),
                   const SizedBox(height: 36),
@@ -156,21 +162,21 @@ class _LoginPageState extends State<LoginPage> {
                   // Email TextField with dark background and floating label style
                   TextField(
                     controller: emailController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white.withOpacity(0.7)), // Lighter color for text
                     decoration: InputDecoration(
                       labelText: 'Email or Phone Number',
-                      labelStyle: TextStyle(color: lightBlue.withOpacity(0.7)),
+                      labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)), // Lighter color for label
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: lightBlue.withOpacity(0.6)),
+                        borderSide: BorderSide(color: Color(0xFF0A2540)), // Direct color usage
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: lightBlue, width: 2),
+                        borderSide: BorderSide(color: Color(0xFF0A2540), width: 2), // Direct color usage
                       ),
                       filled: true,
-                      fillColor: const Color(0xFF15306B),
-                      prefixIcon: Icon(Icons.email_outlined, color: lightBlue),
+                      fillColor: Color(0xFF0A2540), // Direct color usage
+                      prefixIcon: Icon(Icons.email_outlined, color: Colors.white), // White icon
                     ),
                     keyboardType: TextInputType.emailAddress,
                   ),
@@ -180,25 +186,25 @@ class _LoginPageState extends State<LoginPage> {
                   TextField(
                     controller: passwordController,
                     obscureText: !_passwordVisible,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white.withOpacity(0.7)), // Lighter color for text
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      labelStyle: TextStyle(color: lightBlue.withOpacity(0.7)),
+                      labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)), // Lighter color for label
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: lightBlue.withOpacity(0.6)),
+                        borderSide: BorderSide(color: Color(0xFF0A2540)), // Direct color usage
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: lightBlue, width: 2),
+                        borderSide: BorderSide(color: Color(0xFF0A2540), width: 2), // Direct color usage
                       ),
                       filled: true,
-                      fillColor: const Color(0xFF15306B),
-                      prefixIcon: Icon(Icons.lock_outline, color: lightBlue),
+                      fillColor: Color(0xFF0A2540), // Direct color usage
+                      prefixIcon: Icon(Icons.lock_outline, color: Colors.white), // White icon
                       suffixIcon: IconButton(
                         icon: Icon(
                           _passwordVisible ? Icons.visibility_off : Icons.visibility,
-                          color: lightBlue,
+                          color: Colors.white, // White icon for password visibility toggle
                         ),
                         onPressed: () {
                           setState(() {
@@ -219,7 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       child: Text(
                         'Forgot Password?',
-                        style: TextStyle(color: lightBlue.withOpacity(0.8)),
+                        style: TextStyle(color: Color(0xFF0A2540)), // Direct color usage
                       ),
                     ),
                   ),
@@ -234,15 +240,16 @@ class _LoginPageState extends State<LoginPage> {
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
                           if (states.contains(MaterialState.disabled)) {
-                            return lightBlue.withOpacity(0.5);
+                            return Color(0xFF0A2540).withOpacity(0.5); // Navy blue when disabled
                           }
-                          return lightBlue;
+                          return Colors.white; // White for the button background
                         }),
                         shape: MaterialStateProperty.all(
                           RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
                         elevation: MaterialStateProperty.all(8),
-                        shadowColor: MaterialStateProperty.all(lightBlue.withOpacity(0.6)),
+                        shadowColor: MaterialStateProperty.all(Color(0xFF0A2540).withOpacity(0.6)),
+                        side: MaterialStateProperty.all(BorderSide(color: Color(0xFF0A2540), width: 2)), // Outline border added
                       ),
                       child: _isLoading
                           ? const SizedBox(
@@ -250,12 +257,12 @@ class _LoginPageState extends State<LoginPage> {
                         width: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 3,
-                          color: Colors.white,
+                          color: Color(0xFF0A2540), // Direct color usage
                         ),
                       )
                           : const Text(
                         "Login",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A2540)), // Direct color usage
                       ),
                     ),
                   ),

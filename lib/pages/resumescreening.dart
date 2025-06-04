@@ -48,7 +48,7 @@ class _ResumeScreeningPageState extends State<ResumeScreeningPage> {
         return;
       }
 
-      var uri = Uri.parse('http://192.168.1.24:5000/upload_resume'); // use your actual IP
+      var uri = Uri.parse('http://10.2.146.52:8000/match-resumes/'); // use your actual IP
       var request = http.MultipartRequest('POST', uri);
 
       request.files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
