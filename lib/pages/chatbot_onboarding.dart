@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -14,20 +16,11 @@ class _ChatScreenState extends State<ChatScreen> {
       'Hi! How can I help you today? I can assist you with policies, HR records, or calendar-related questions.',
       isBot: true,
     ),
-    const _Message(
-      text: "What's the policy for sick leave?",
-      isBot: false,
-    ),
-    const _Message(
-      text:
-      'According to our policy, employees are entitled to 10 paid sick days per year. Would you like me to share more details about the sick leave policy?',
-      isBot: true,
-    ),
   ];
 
   final TextEditingController _controller = TextEditingController();
 
-  void _sendMessage() {
+  void _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
@@ -37,15 +30,39 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _controller.clear();
 
-    // Bot auto-reply
-    Future.delayed(const Duration(milliseconds: 500), () {
+    try {
+      final response = await http.post(
+        // ✅ Use your machine’s IP if running on physical device
+        Uri.parse('http://127.0.0.1:8000 /ask'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'query': text}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // ✅ Use the correct key based on FastAPI backend
+        final answer = data['response'];
+
+        setState(() {
+          _messages.add(_Message(text: answer, isBot: true));
+        });
+      } else {
+        setState(() {
+          _messages.add(const _Message(
+            text: 'Sorry, something went wrong. Please try again later.',
+            isBot: true,
+          ));
+        });
+      }
+    } catch (e) {
       setState(() {
         _messages.add(const _Message(
-          text: "Thank you for your message! I'll get back to you shortly.",
+          text: '❌ Failed to connect to the server.',
           isBot: true,
         ));
       });
-    });
+    }
   }
 
   @override
@@ -54,23 +71,16 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context); // Go back
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         title: const ListTile(
           leading: CircleAvatar(
             backgroundColor: Colors.blue,
             child: Icon(Icons.smart_toy, color: Colors.white),
           ),
-          title: Text(
-            'Rebota\nHR Assistant',
-            style: TextStyle(fontSize: 16),
-          ),
-          subtitle: Text(
-            'Online',
-            style: TextStyle(color: Colors.green, fontSize: 12),
-          ),
+          title: Text('Rebota\nHR Assistant', style: TextStyle(fontSize: 16)),
+          subtitle:
+          Text('Online', style: TextStyle(color: Colors.green, fontSize: 12)),
         ),
       ),
       body: Column(
@@ -87,17 +97,13 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          MessageInput(
-            controller: _controller,
-            onSend: _sendMessage,
-          ),
+          MessageInput(controller: _controller, onSend: _sendMessage),
         ],
       ),
     );
   }
 }
 
-// Message model
 class _Message {
   final String text;
   final bool isBot;
@@ -105,7 +111,6 @@ class _Message {
   const _Message({required this.text, required this.isBot});
 }
 
-// Bot message widget
 class BotMessage extends StatelessWidget {
   final String text;
   const BotMessage({super.key, required this.text});
@@ -119,15 +124,11 @@ class BotMessage extends StatelessWidget {
         color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 15),
-      ),
+      child: Text(text, style: const TextStyle(fontSize: 15)),
     );
   }
 }
 
-// User message widget
 class UserMessage extends StatelessWidget {
   final String text;
   const UserMessage({super.key, required this.text});
@@ -143,16 +144,13 @@ class UserMessage extends StatelessWidget {
           color: Colors.blue.shade700,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(
-          text,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
-        ),
+        child: Text(text,
+            style: const TextStyle(color: Colors.white, fontSize: 15)),
       ),
     );
   }
 }
 
-// Message input widget
 class MessageInput extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
@@ -168,9 +166,7 @@ class MessageInput extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Colors.grey.shade300),
-        ),
+        border: Border(top: BorderSide(color: Colors.grey.shade300)),
       ),
       child: Row(
         children: [
